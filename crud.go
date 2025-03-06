@@ -67,6 +67,14 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 				}
 			}
 
+			if fd.FieldType == "float" {
+				_, err := strconv.ParseFloat(v, 64)
+				if err != nil {
+					msg := fmt.Sprintf("The value '%s' to field '%s' is not of type 'float'", v, fd.FieldName)
+					return -1, retError(24, msg)
+				}
+			}
+
 		}
 		if !ok && fd.Required {
 			return -1, retError(22, fmt.Sprintf("The field '%s' is required.", fd.FieldName))
@@ -131,6 +139,12 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 		case int64:
 			vInStr := strconv.FormatInt(vInType, 10)
 			newMap[k] = vInStr
+		case float64:
+			vInStr := strconv.FormatFloat(vInType, 'f', -1, 64)
+			newMap[k] = vInStr
+		case float32:
+			vInStr := strconv.FormatFloat(float64(vInType), 'f', -1, 64)
+			newMap[k] = vInStr
 		case string:
 			newMap[k] = vInType
 		}
@@ -190,6 +204,12 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 					return nil, fmt.Errorf("the value '%s' to field '%s' is not of type 'int'", v, k)
 				}
 				tmpRow[k] = vInt
+			} else if fieldType == "float" {
+				vFloat, err := strconv.ParseFloat(v, 64)
+				if err != nil {
+					return nil, fmt.Errorf("the value '%s' to field '%s' is not of type 'float'", v, k)
+				}
+				tmpRow[k] = vFloat
 			}
 		}
 	}
