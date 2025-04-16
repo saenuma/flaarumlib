@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // InsertRowStr inserts a row into a table. It expects the input to be of type map[string]string.
@@ -145,6 +146,17 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 		case float32:
 			vInStr := strconv.FormatFloat(float64(vInType), 'f', -1, 64)
 			newMap[k] = vInStr
+		case time.Time:
+			ft, ok := fieldNamesToFieldTypes[k]
+			if !ok {
+				return nil, fmt.Errorf("the field '%s' is not in the structure of table '%s' of project '%s'",
+					k, tableName, cl.ProjName)
+			}
+			if ft == "date" {
+				newMap[k] = RightDateFormat(vInType)
+			} else if ft == "datetime" {
+				newMap[k] = RightDateTimeFormat(vInType)
+			}
 		case string:
 			newMap[k] = vInType
 		}
@@ -210,6 +222,18 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 					return nil, fmt.Errorf("the value '%s' to field '%s' is not of type 'float'", v, k)
 				}
 				tmpRow[k] = vFloat
+			} else if fieldType == "date" {
+				vTime1, err1 := time.Parse(DATE_FORMAT, v)
+				if err1 != nil {
+					return nil, fmt.Errorf("the value '%s' to field '%s' is not in date format", v, k)
+				}
+				tmpRow[k] = vTime1
+			} else if fieldType == "datetime" {
+				vTime1, err1 := time.Parse(DATETIME_FORMAT, v)
+				if err1 != nil {
+					return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
+				}
+				tmpRow[k] = vTime1
 			}
 		}
 	}
