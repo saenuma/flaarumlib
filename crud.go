@@ -33,8 +33,9 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 
 	for k := range toInsert {
 		if k == "id" || k == "_version" {
-			msg := fmt.Sprintf("The field '%s' would be generated. Please remove.", k)
-			return -1, retError(20, msg)
+			// msg := fmt.Sprintf("The field '%s' would be generated. Please remove.", k)
+			// return -1, retError(20, msg)
+			continue
 		}
 
 		if !slices.Contains(fields, k) {
