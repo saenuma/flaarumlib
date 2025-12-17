@@ -10,10 +10,11 @@ import (
 )
 
 func NameValidate(name string) error {
-	if strings.Contains(name, ".") || strings.Contains(name, " ") || strings.Contains(name, "\t") ||
-		strings.Contains(name, "\n") || strings.Contains(name, ":") || strings.Contains(name, "/") ||
-		strings.Contains(name, "~") {
-		return errors.New("object name must not contain space, '.', ':', '/', ~ ")
+	excludedChars := []string{".", " ", "\t", "\n", ":", "/", "~", "|"}
+	for  _, excludedChar := range excludedChars {
+		if strings.Contains(name, excludedChar) {
+			return errors.New("object name must not contain any of: "+ strings.Join(excludedChars, " "))
+		}
 	}
 
 	return nil
@@ -63,7 +64,7 @@ func ParseTableStructureStmt(stmt string) (TableStruct, error) {
 			return ts, err
 		}
 
-		if !slices.Contains([]string{"int", "float", "string", "text", "date", "datetime"}, parts[1]) {
+		if !slices.Contains([]string{"int", "float", "string", "text", "date", "datetime", "list_int"}, parts[1]) {
 			return ts, errors.New(fmt.Sprintf("Bad Statement: the field type '%s' is not allowed in flaarum.", parts[1]))
 		}
 		fs := FieldStruct{FieldName: parts[0], FieldType: parts[1]}

@@ -12,11 +12,6 @@ import (
 
 var httpCl *http.Client
 
-const (
-	DATE_FORMAT     = "2006-01-02"
-	DATETIME_FORMAT = "2006-01-02T15:04 MST"
-)
-
 func init() {
 	config := &tls.Config{InsecureSkipVerify: true}
 	tr := &http.Transport{TLSClientConfig: config}
@@ -71,5 +66,5 @@ func RightDateFormat(d time.Time) string {
 
 // Converts a time.Time to the datetime format expected in flaarum
 func RightDateTimeFormat(d time.Time) string {
-	return d.Format(DATETIME_FORMAT)
+	return d.Format(DATETIME_FORMAT_ALT)
 }

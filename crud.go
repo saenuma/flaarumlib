@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // InsertRowStr inserts a row into a table. It expects the input to be of type map[string]string.
@@ -50,8 +51,8 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 
 		if ok && v != "" {
 			if fd.FieldType == "string" {
-				if len(v) > 200 {
-					msg := fmt.Sprintf("The value '%s' to field '%s' is longer than 200 characters", v, fd.FieldName)
+				if len(v) > MAX_LENGTH_STRING {
+					msg := fmt.Sprintf("The value '%s' to field '%s' is longer than %s characters", v, fd.FieldName, MAX_LENGTH_STRING)
 					return -1, retError(24, msg)
 				}
 				if strings.Contains(v, "\n") || strings.Contains(v, "\r\n") {
@@ -73,6 +74,36 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 				_, err := strconv.ParseFloat(v, 64)
 				if err != nil {
 					msg := fmt.Sprintf("The value '%s' to field '%s' is not of type 'float'", v, fd.FieldName)
+					return -1, retError(24, msg)
+				}
+			}
+
+			if fd.FieldType == "date" {
+				_, err := time.Parse(DATE_FORMAT, v)
+				if err != nil {
+					msg := fmt.Sprintf("The value '%s' to field '%s' is not of type 'date'", v, fd.FieldName)
+					return -1, retError(24, msg)
+				}
+			}
+
+			if fd.FieldType == "datetime" {
+				_, err := time.Parse(DATETIME_FORMAT, v)
+				_, err2 := time.Parse(DATETIME_FORMAT_ALT, v)
+				if err != nil || err2 != nil {
+					msg := fmt.Sprintf("The value '%s' to field '%s' is not of type 'datetime'", v, fd.FieldName)
+					return -1, retError(24, msg)
+				}
+			}
+
+			if fd.FieldType == "list_int" {
+				failedCharTest := false
+				for _, r := range v {
+					if !unicode.IsDigit(r) && r != rune(LIST_INT_SEPARATOR[0]) {
+						failedCharTest = true
+					}
+				}
+				if failedCharTest {
+					msg := fmt.Sprintf("The value '%s' contains chars that is not digit or '|', Thus not of type 'list_int'", v, fd.FieldName)
 					return -1, retError(24, msg)
 				}
 			}
@@ -160,6 +191,17 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 			}
 		case string:
 			newMap[k] = vInType
+		case []int64:
+			tmpVStr := ""
+			for i, tmpPartVInt := range vInType {
+				tmpVStr += fmt.Sprintf("%d", tmpPartVInt)
+				if i != len(vInType) {
+					tmpVStr += LIST_INT_SEPARATOR
+				}
+			}
+			newMap[k] = tmpVStr
+		default:
+			return nil, fmt.Errorf("This type '%v' is not supported in this database", vInType)
 		}
 	}
 
@@ -235,6 +277,21 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 					return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
 				}
 				tmpRow[k] = vTime1
+			} else if fieldType == "list_int" {
+				vListInt := make([]int64, 0)
+				for _, str := range strings.Split(v, LIST_INT_SEPARATOR) {
+					str = strings.TrimSpace(str)
+					if str == "" {
+						continue
+					}
+					tmpStrInt, err := strconv.ParseInt(v, 10, 64)
+					if err != nil {
+						return nil, fmt.Errorf("the value '%s' to field '%s' contains character(s) that are not digit or %s",
+						 v, k, LIST_INT_SEPARATOR)
+					}
+					vListInt = append(vListInt, tmpStrInt)
+				}
+				tmpRow[k] = vListInt
 			}
 		}
 	}
