@@ -11,9 +11,9 @@ import (
 
 func NameValidate(name string) error {
 	excludedChars := []string{".", " ", "\t", "\n", ":", "/", "~", "|"}
-	for  _, excludedChar := range excludedChars {
+	for _, excludedChar := range excludedChars {
 		if strings.Contains(name, excludedChar) {
-			return errors.New("object name must not contain any of: "+ strings.Join(excludedChars, " "))
+			return errors.New("object name must not contain any of: " + strings.Join(excludedChars, " "))
 		}
 	}
 

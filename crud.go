@@ -191,7 +191,7 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 			}
 		case string:
 			newMap[k] = vInType
-		case []int64:
+		case []int64 || []int:
 			tmpVStr := ""
 			for i, tmpPartVInt := range vInType {
 				tmpVStr += fmt.Sprintf("%d", tmpPartVInt)
@@ -274,9 +274,14 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 			} else if fieldType == "datetime" {
 				vTime1, err1 := time.Parse(DATETIME_FORMAT, v)
 				if err1 != nil {
-					return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
+					vTime2, err2 := time.Parse(DATETIME_FORMAT_ALT, v)
+					if err2 {
+						return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
+					}
+					tmpRow[k] = vTime2
+				} else {
+					tmpRow[k] = vTime1
 				}
-				tmpRow[k] = vTime1
 			} else if fieldType == "list_int" {
 				vListInt := make([]int64, 0)
 				for _, str := range strings.Split(v, LIST_INT_SEPARATOR) {
@@ -287,7 +292,7 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 					tmpStrInt, err := strconv.ParseInt(v, 10, 64)
 					if err != nil {
 						return nil, fmt.Errorf("the value '%s' to field '%s' contains character(s) that are not digit or %s",
-						 v, k, LIST_INT_SEPARATOR)
+							v, k, LIST_INT_SEPARATOR)
 					}
 					vListInt = append(vListInt, tmpStrInt)
 				}
