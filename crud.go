@@ -193,6 +193,7 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 			newMap[k] = vInType
 		case []int64 || []int:
 			tmpVStr := ""
+			slices.Sort(vInType)
 			for i, tmpPartVInt := range vInType {
 				tmpVStr += fmt.Sprintf("%d", tmpPartVInt)
 				if i != len(vInType) {
