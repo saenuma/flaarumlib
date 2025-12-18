@@ -2,11 +2,13 @@
 package flaarumlib
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -35,10 +37,24 @@ func NewClientCustomPort(ip, keyStr, projName string, port int) Client {
 }
 
 func (cl *Client) Ping() error {
+	deadline := time.Now().Add(2000 * time.Millisecond)
+	ctx, cancelCtx := context.WithDeadline(context.Background(), deadline)
+	defer cancelCtx()
+
+	return cl.InnerPing(ctx)
+}
+
+func (cl *Client) InnerPing(ctx context.Context) error {
 	urlValues := url.Values{}
 	urlValues.Set("key-str", cl.KeyStr)
 
-	resp, err := httpCl.PostForm(cl.Addr+"is-flaarum", urlValues)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, cl.Addr+"is-flaarum",
+		strings.NewReader(urlValues.Encode()))
+	if err != nil {
+		return retError(10, err.Error())
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := httpCl.Do(req)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -57,6 +73,7 @@ func (cl *Client) Ping() error {
 	} else {
 		return retError(10, string(body))
 	}
+
 }
 
 // Converts a time.Time to the date format expected in flaarum
