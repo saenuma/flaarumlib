@@ -66,5 +66,5 @@ func RightDateFormat(d time.Time) string {
 
 // Converts a time.Time to the datetime format expected in flaarum
 func RightDateTimeFormat(d time.Time) string {
-	return d.Format(DATETIME_FORMAT_ALT)
+	return d.Format(DATETIME_FORMAT)
 }

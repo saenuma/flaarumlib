@@ -88,8 +88,7 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 
 			if fd.FieldType == "datetime" {
 				_, err := time.Parse(DATETIME_FORMAT, v)
-				_, err2 := time.Parse(DATETIME_FORMAT_ALT, v)
-				if err != nil || err2 != nil {
+				if err != nil {
 					msg := fmt.Sprintf("The value '%s' to field '%s' is not of type 'datetime'", v, fd.FieldName)
 					return -1, retError(24, msg)
 				}
@@ -283,16 +282,11 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 				}
 				tmpRow[k] = vTime1
 			} else if fieldType == "datetime" {
-				vTime1, err1 := time.Parse(DATETIME_FORMAT, v)
-				if err1 != nil {
-					vTime2, err2 := time.Parse(DATETIME_FORMAT_ALT, v)
-					if err2 != nil{
-						return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
-					}
-					tmpRow[k] = vTime2
-				} else {
-					tmpRow[k] = vTime1
+				vTime1, err := time.Parse(DATETIME_FORMAT, v)
+				if err != nil {
+					return nil, fmt.Errorf("the value '%s' to field '%s' is not in datetime format", v, k)
 				}
+				tmpRow[k] = vTime1
 			} else if fieldType == "list_int" {
 				vListInt := make([]int64, 0)
 				for _, str := range strings.Split(v, LIST_INT_SEPARATOR) {
