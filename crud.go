@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
@@ -17,7 +18,6 @@ import (
 // It returns the id of the newly created row
 func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (int64, error) {
 	urlValues := url.Values{}
-	urlValues.Add("key-str", cl.KeyStr)
 	for k, v := range toInsert {
 		urlValues.Add(k, v)
 	}
@@ -52,7 +52,7 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 		if ok && v != "" {
 			if fd.FieldType == "string" {
 				if len(v) > MAX_LENGTH_STRING {
-					msg := fmt.Sprintf("The value '%s' to field '%s' is longer than %s characters", v, fd.FieldName, MAX_LENGTH_STRING)
+					msg := fmt.Sprintf("The value '%s' to field '%s' is longer than %d characters", v, fd.FieldName, MAX_LENGTH_STRING)
 					return -1, retError(24, msg)
 				}
 				if strings.Contains(v, "\n") || strings.Contains(v, "\r\n") {
@@ -102,7 +102,8 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 					}
 				}
 				if failedCharTest {
-					msg := fmt.Sprintf("The value '%s' contains chars that is not digit or '|', Thus not of type 'list_int'", v, fd.FieldName)
+					msg := fmt.Sprintf("the value '%s' of field '%s' contains chars that is not digit or '|', Thus not of type 'list_int'",
+						v, fd.FieldName)
 					return -1, retError(24, msg)
 				}
 			}
@@ -113,7 +114,7 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 		}
 	}
 
-	resp, err := httpCl.PostForm(fmt.Sprintf("%sinsert-row/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sinsert-row/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -211,7 +212,7 @@ func (cl *Client) ConvertInterfaceMapToStringMap(tableName string, oldMap map[st
 			}
 			newMap[k] = tmpVStr
 		default:
-			return nil, fmt.Errorf("This type '%v' is not supported in this database", vInType)
+			return nil, fmt.Errorf("this type '%v' is not supported in this database", vInType)
 		}
 	}
 
@@ -335,7 +336,6 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 
 func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 	urlValues := url.Values{}
-	urlValues.Set("key-str", cl.KeyStr)
 	urlValues.Set("stmt", stmt)
 
 	_, err := ParseSearchStmt(stmt)
@@ -343,7 +343,7 @@ func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 		return nil, retError(12, err.Error())
 	}
 
-	resp, err := httpCl.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
 	if err != nil {
 		return nil, retError(10, err.Error())
 	}
@@ -384,7 +384,7 @@ func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 
 func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 	urlValues := url.Values{}
-	urlValues.Set("key-str", cl.KeyStr)
+
 	urlValues.Set("stmt", stmt)
 	urlValues.Set("query-one", "t")
 
@@ -393,7 +393,7 @@ func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 		return nil, retError(12, err.Error())
 	}
 
-	resp, err := httpCl.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
 	if err != nil {
 		return nil, retError(10, err.Error())
 	}
@@ -426,7 +426,7 @@ func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 
 func (cl Client) DeleteRows(stmt string) error {
 	urlValues := url.Values{}
-	urlValues.Add("key-str", cl.KeyStr)
+
 	urlValues.Add("stmt", stmt)
 
 	_, err := ParseSearchStmt(stmt)
@@ -434,7 +434,7 @@ func (cl Client) DeleteRows(stmt string) error {
 		return retError(12, err.Error())
 	}
 
-	resp, err := httpCl.PostForm(fmt.Sprintf("%sdelete-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sdelete-rows/%s", cl.Addr, cl.ProjName), urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -454,7 +454,7 @@ func (cl Client) DeleteRows(stmt string) error {
 
 func (cl Client) CountRows(stmt string) (int64, error) {
 	urlValues := url.Values{}
-	urlValues.Set("key-str", cl.KeyStr)
+
 	urlValues.Set("stmt", stmt)
 
 	_, err := ParseSearchStmt(stmt)
@@ -462,7 +462,7 @@ func (cl Client) CountRows(stmt string) (int64, error) {
 		return -1, retError(12, err.Error())
 	}
 
-	resp, err := httpCl.PostForm(fmt.Sprintf("%scount-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%scount-rows/%s", cl.Addr, cl.ProjName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -484,9 +484,8 @@ func (cl Client) CountRows(stmt string) (int64, error) {
 
 func (cl Client) AllRowsCount(tableName string) (int64, error) {
 	urlValues := url.Values{}
-	urlValues.Set("key-str", cl.KeyStr)
 
-	resp, err := httpCl.PostForm(fmt.Sprintf("%sall-rows-count/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sall-rows-count/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -508,7 +507,7 @@ func (cl Client) AllRowsCount(tableName string) (int64, error) {
 
 func (cl Client) UpdateRowsStr(stmt string, updateDataStr map[string]string) error {
 	urlValues := url.Values{}
-	urlValues.Add("key-str", cl.KeyStr)
+
 	urlValues.Add("stmt", stmt)
 
 	_, err := ParseSearchStmt(stmt)
@@ -526,7 +525,7 @@ func (cl Client) UpdateRowsStr(stmt string, updateDataStr map[string]string) err
 		urlValues.Add(fmt.Sprintf("set%d_v", i+1), updateDataStr[k])
 	}
 
-	resp, err := httpCl.PostForm(fmt.Sprintf("%supdate-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%supdate-rows/%s", cl.Addr, cl.ProjName), urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}

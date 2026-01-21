@@ -3,7 +3,6 @@ package flaarumlib
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,28 +11,18 @@ import (
 	"time"
 )
 
-var httpCl *http.Client
-
-func init() {
-	config := &tls.Config{InsecureSkipVerify: true}
-	tr := &http.Transport{TLSClientConfig: config}
-
-	httpCl = &http.Client{Transport: tr}
-}
-
 type Client struct {
 	Addr     string
-	KeyStr   string
 	ProjName string
 }
 
 func NewClient(ip, keyStr, projName string) Client {
-	return Client{"https://" + ip + ":22318/", keyStr, projName}
+	return Client{"http://" + ip + ":22318/", projName}
 }
 
 // Used whenever you changed the default port
 func NewClientCustomPort(ip, keyStr, projName string, port int) Client {
-	return Client{"https://" + ip + fmt.Sprintf(":%d/", port), keyStr, projName}
+	return Client{"http://" + ip + fmt.Sprintf(":%d/", port), projName}
 }
 
 func (cl *Client) Ping() error {
@@ -46,7 +35,6 @@ func (cl *Client) Ping() error {
 
 func (cl *Client) InnerPing(ctx context.Context) error {
 	urlValues := url.Values{}
-	urlValues.Set("key-str", cl.KeyStr)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, cl.Addr+"is-flaarum",
 		strings.NewReader(urlValues.Encode()))
@@ -54,7 +42,7 @@ func (cl *Client) InnerPing(ctx context.Context) error {
 		return retError(10, err.Error())
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := httpCl.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return retError(10, err.Error())
 	}
