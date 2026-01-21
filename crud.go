@@ -114,7 +114,7 @@ func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (in
 		}
 	}
 
-	resp, err := http.PostForm(fmt.Sprintf("%sinsert-row/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sinsert-row/%s/%s", DEFAULT_ADDR, cl.ProjName, tableName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -343,7 +343,7 @@ func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 		return nil, retError(12, err.Error())
 	}
 
-	resp, err := http.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"search-table/"+cl.ProjName, urlValues)
 	if err != nil {
 		return nil, retError(10, err.Error())
 	}
@@ -393,7 +393,7 @@ func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 		return nil, retError(12, err.Error())
 	}
 
-	resp, err := http.PostForm(cl.Addr+"search-table/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"search-table/"+cl.ProjName, urlValues)
 	if err != nil {
 		return nil, retError(10, err.Error())
 	}
@@ -434,7 +434,7 @@ func (cl Client) DeleteRows(stmt string) error {
 		return retError(12, err.Error())
 	}
 
-	resp, err := http.PostForm(fmt.Sprintf("%sdelete-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sdelete-rows/%s", DEFAULT_ADDR, cl.ProjName), urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -462,7 +462,7 @@ func (cl Client) CountRows(stmt string) (int64, error) {
 		return -1, retError(12, err.Error())
 	}
 
-	resp, err := http.PostForm(fmt.Sprintf("%scount-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%scount-rows/%s", DEFAULT_ADDR, cl.ProjName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -485,7 +485,7 @@ func (cl Client) CountRows(stmt string) (int64, error) {
 func (cl Client) AllRowsCount(tableName string) (int64, error) {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(fmt.Sprintf("%sall-rows-count/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sall-rows-count/%s/%s", DEFAULT_ADDR, cl.ProjName, tableName), urlValues)
 	if err != nil {
 		return 0, retError(10, err.Error())
 	}
@@ -525,7 +525,7 @@ func (cl Client) UpdateRowsStr(stmt string, updateDataStr map[string]string) err
 		urlValues.Add(fmt.Sprintf("set%d_v", i+1), updateDataStr[k])
 	}
 
-	resp, err := http.PostForm(fmt.Sprintf("%supdate-rows/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%supdate-rows/%s", DEFAULT_ADDR, cl.ProjName), urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}

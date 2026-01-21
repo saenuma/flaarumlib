@@ -15,7 +15,7 @@ func (cl *Client) CreateTable(stmt string) error {
 
 	urlValues.Add("stmt", stmt)
 
-	resp, err := http.PostForm(cl.Addr+"create-table/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"create-table/"+cl.ProjName, urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -37,7 +37,7 @@ func (cl *Client) UpdateTableStructure(stmt string) error {
 
 	urlValues.Add("stmt", stmt)
 
-	resp, err := http.PostForm(cl.Addr+"update-table-structure/"+cl.ProjName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"update-table-structure/"+cl.ProjName, urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -96,7 +96,7 @@ func (cl *Client) CreateOrUpdateTable(stmt string) error {
 func (cl *Client) GetCurrentTableVersionNum(tableName string) (int64, error) {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(fmt.Sprintf("%sget-current-version-num/%s/%s", cl.Addr, cl.ProjName, tableName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%sget-current-version-num/%s/%s", DEFAULT_ADDR, cl.ProjName, tableName), urlValues)
 	if err != nil {
 		return -1, retError(10, err.Error())
 	}
@@ -117,7 +117,7 @@ func (cl *Client) GetCurrentTableVersionNum(tableName string) (int64, error) {
 func (cl *Client) GetTableStructure(tableName string, versionNum int64) (string, error) {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(fmt.Sprintf("%sget-table-structure/%s/%s/%d", cl.Addr, cl.ProjName, tableName, versionNum),
+	resp, err := http.PostForm(fmt.Sprintf("%sget-table-structure/%s/%s/%d", DEFAULT_ADDR, cl.ProjName, tableName, versionNum),
 		urlValues)
 	if err != nil {
 		return "", retError(10, err.Error())
@@ -158,7 +158,7 @@ func (cl *Client) GetCurrentTableStructureParsed(tableName string) (TableStruct,
 func (cl Client) ListTables() ([]string, error) {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(fmt.Sprintf("%slist-tables/%s", cl.Addr, cl.ProjName), urlValues)
+	resp, err := http.PostForm(fmt.Sprintf("%slist-tables/%s", DEFAULT_ADDR, cl.ProjName), urlValues)
 	if err != nil {
 		return nil, retError(10, err.Error())
 	}
@@ -181,7 +181,7 @@ func (cl Client) ListTables() ([]string, error) {
 func (cl *Client) DeleteTable(tableName string) error {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(cl.Addr+"delete-table/"+cl.ProjName+"/"+tableName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"delete-table/"+cl.ProjName+"/"+tableName, urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}

@@ -10,7 +10,7 @@ import (
 func (cl *Client) CreateProject(projName string) error {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(cl.Addr+"create-project/"+projName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"create-project/"+projName, urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -30,7 +30,7 @@ func (cl *Client) CreateProject(projName string) error {
 func (cl *Client) DeleteProject(projName string) error {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(cl.Addr+"delete-project/"+projName, urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"delete-project/"+projName, urlValues)
 	if err != nil {
 		return retError(10, err.Error())
 	}
@@ -50,7 +50,7 @@ func (cl *Client) DeleteProject(projName string) error {
 func (cl *Client) ListProjects() ([]string, error) {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(cl.Addr+"list-projects", urlValues)
+	resp, err := http.PostForm(DEFAULT_ADDR+"list-projects", urlValues)
 	if err != nil {
 		return []string{}, retError(10, err.Error())
 	}
@@ -72,7 +72,7 @@ func (cl *Client) ListProjects() ([]string, error) {
 func (cl *Client) RenameProject(projName, newProjName string) error {
 	urlValues := url.Values{}
 
-	resp, err := http.PostForm(cl.Addr+"rename-project/"+projName+"/"+newProjName,
+	resp, err := http.PostForm(DEFAULT_ADDR+"rename-project/"+projName+"/"+newProjName,
 		urlValues)
 	if err != nil {
 		return retError(10, err.Error())

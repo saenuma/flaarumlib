@@ -6,4 +6,6 @@ const (
 
 	DATE_FORMAT     = "2006-01-02"
 	DATETIME_FORMAT = "2006-01-02T15:04 MST"
+
+	DEFAULT_ADDR = "http://127.0.0.1:22318/"
 )

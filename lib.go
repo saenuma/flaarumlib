@@ -3,7 +3,6 @@ package flaarumlib
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,17 +11,11 @@ import (
 )
 
 type Client struct {
-	Addr     string
 	ProjName string
 }
 
-func NewClient(ip, projName string) Client {
-	return Client{"http://" + ip + ":22318/", projName}
-}
-
-// Used whenever you changed the default port
-func NewClientCustomPort(ip, projName string, port int) Client {
-	return Client{"http://" + ip + fmt.Sprintf(":%d/", port), projName}
+func NewClient(projName string) Client {
+	return Client{projName}
 }
 
 func (cl *Client) Ping() error {
@@ -30,13 +23,13 @@ func (cl *Client) Ping() error {
 	ctx, cancelCtx := context.WithDeadline(context.Background(), deadline)
 	defer cancelCtx()
 
-	return cl.InnerPing(ctx)
+	return cl.innerPing(ctx)
 }
 
-func (cl *Client) InnerPing(ctx context.Context) error {
+func (cl *Client) innerPing(ctx context.Context) error {
 	urlValues := url.Values{}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, cl.Addr+"is-flaarum",
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, DEFAULT_ADDR+"is-flaarum",
 		strings.NewReader(urlValues.Encode()))
 	if err != nil {
 		return retError(10, err.Error())
