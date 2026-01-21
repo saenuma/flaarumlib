@@ -16,12 +16,12 @@ type Client struct {
 	ProjName string
 }
 
-func NewClient(ip, keyStr, projName string) Client {
+func NewClient(ip, projName string) Client {
 	return Client{"http://" + ip + ":22318/", projName}
 }
 
 // Used whenever you changed the default port
-func NewClientCustomPort(ip, keyStr, projName string, port int) Client {
+func NewClientCustomPort(ip, projName string, port int) Client {
 	return Client{"http://" + ip + fmt.Sprintf(":%d/", port), projName}
 }
 
