@@ -12,7 +12,7 @@ import (
 
 func (cl *Client) CreateTable(stmt string) error {
 	urlValues := url.Values{}
-
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 	urlValues.Add("stmt", stmt)
 
 	resp, err := http.PostForm(DEFAULT_ADDR+"create-table/"+cl.ProjName, urlValues)
@@ -34,7 +34,7 @@ func (cl *Client) CreateTable(stmt string) error {
 
 func (cl *Client) UpdateTableStructure(stmt string) error {
 	urlValues := url.Values{}
-
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 	urlValues.Add("stmt", stmt)
 
 	resp, err := http.PostForm(DEFAULT_ADDR+"update-table-structure/"+cl.ProjName, urlValues)
@@ -95,6 +95,7 @@ func (cl *Client) CreateOrUpdateTable(stmt string) error {
 
 func (cl *Client) GetCurrentTableVersionNum(tableName string) (int64, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	resp, err := http.PostForm(fmt.Sprintf("%sget-current-version-num/%s/%s", DEFAULT_ADDR, cl.ProjName, tableName), urlValues)
 	if err != nil {
@@ -116,6 +117,7 @@ func (cl *Client) GetCurrentTableVersionNum(tableName string) (int64, error) {
 
 func (cl *Client) GetTableStructure(tableName string, versionNum int64) (string, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	resp, err := http.PostForm(fmt.Sprintf("%sget-table-structure/%s/%s/%d", DEFAULT_ADDR, cl.ProjName, tableName, versionNum),
 		urlValues)
@@ -157,6 +159,7 @@ func (cl *Client) GetCurrentTableStructureParsed(tableName string) (TableStruct,
 
 func (cl Client) ListTables() ([]string, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	resp, err := http.PostForm(fmt.Sprintf("%slist-tables/%s", DEFAULT_ADDR, cl.ProjName), urlValues)
 	if err != nil {
@@ -180,6 +183,7 @@ func (cl Client) ListTables() ([]string, error) {
 
 func (cl *Client) DeleteTable(tableName string) error {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	resp, err := http.PostForm(DEFAULT_ADDR+"delete-table/"+cl.ProjName+"/"+tableName, urlValues)
 	if err != nil {

@@ -18,6 +18,8 @@ import (
 // It returns the id of the newly created row
 func (cl *Client) InsertRowStr(tableName string, toInsert map[string]string) (int64, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
+
 	for k, v := range toInsert {
 		urlValues.Add(k, v)
 	}
@@ -335,6 +337,7 @@ func (cl *Client) ParseRow(rowStr map[string]string, tableStruct TableStruct) (m
 
 func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 	urlValues.Set("stmt", stmt)
 
 	_, err := ParseSearchStmt(stmt)
@@ -383,7 +386,7 @@ func (cl *Client) Search(stmt string) (*[]map[string]any, error) {
 
 func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 	urlValues := url.Values{}
-
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 	urlValues.Set("stmt", stmt)
 	urlValues.Set("query-one", "t")
 
@@ -425,6 +428,7 @@ func (cl Client) SearchForOne(stmt string) (*map[string]any, error) {
 
 func (cl Client) DeleteRows(stmt string) error {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	urlValues.Add("stmt", stmt)
 
@@ -453,6 +457,7 @@ func (cl Client) DeleteRows(stmt string) error {
 
 func (cl Client) CountRows(stmt string) (int64, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	urlValues.Set("stmt", stmt)
 
@@ -483,6 +488,7 @@ func (cl Client) CountRows(stmt string) (int64, error) {
 
 func (cl Client) AllRowsCount(tableName string) (int64, error) {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	resp, err := http.PostForm(fmt.Sprintf("%sall-rows-count/%s/%s", DEFAULT_ADDR, cl.ProjName, tableName), urlValues)
 	if err != nil {
@@ -506,6 +512,7 @@ func (cl Client) AllRowsCount(tableName string) (int64, error) {
 
 func (cl Client) UpdateRowsStr(stmt string, updateDataStr map[string]string) error {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	urlValues.Add("stmt", stmt)
 

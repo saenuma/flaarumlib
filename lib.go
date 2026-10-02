@@ -3,19 +3,36 @@ package flaarumlib
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+	"unicode"
+
+	"github.com/pkg/errors"
 )
 
 type Client struct {
-	ProjName string
+	ProjName       string
+	KeyFromFlaarum string
 }
 
-func NewClient(projName string) Client {
-	return Client{projName}
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] > unicode.MaxASCII { // unicode.MaxASCII is 127
+			return false
+		}
+	}
+	return true
+}
+
+func NewClient(projName, keyStr string) (Client, error) {
+	if len(keyStr) != 20 && isASCII(keyStr) {
+		return Client{}, errors.New(fmt.Sprintf("keyStr '%s' is either not length 20 or contains non ASCII characters", keyStr))
+	}
+	return Client{projName, keyStr}, nil
 }
 
 func (cl *Client) Ping() error {
@@ -28,6 +45,7 @@ func (cl *Client) Ping() error {
 
 func (cl *Client) innerPing(ctx context.Context) error {
 	urlValues := url.Values{}
+	urlValues.Add("tinything", cl.KeyFromFlaarum)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, DEFAULT_ADDR+"is-flaarum",
 		strings.NewReader(urlValues.Encode()))
