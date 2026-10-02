@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/pkg/errors"
 )
@@ -20,7 +21,7 @@ type Client struct {
 
 func haveAllowedChars(s string) bool {
 	for i := 0; i < len(s); i++ {
-		if s[i] > 255 {
+		if s[i] > unicode.MaxASCII { // unicode.MaxASCII is 127
 			return false
 		}
 	}
