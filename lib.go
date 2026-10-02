@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/pkg/errors"
 )
@@ -19,9 +18,9 @@ type Client struct {
 	KeyFromFlaarum string
 }
 
-func isASCII(s string) bool {
+func haveAllowedChars(s string) bool {
 	for i := 0; i < len(s); i++ {
-		if s[i] > unicode.MaxASCII { // unicode.MaxASCII is 127
+		if s[i] > 255 {
 			return false
 		}
 	}
@@ -29,7 +28,7 @@ func isASCII(s string) bool {
 }
 
 func NewClient(projName, keyStr string) (Client, error) {
-	if len(keyStr) != 20 && isASCII(keyStr) {
+	if len(keyStr) != 20 && !haveAllowedChars(keyStr) {
 		return Client{}, errors.New(fmt.Sprintf("keyStr '%s' is either not length 20 or contains non ASCII characters", keyStr))
 	}
 	return Client{projName, keyStr}, nil
