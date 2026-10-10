@@ -29,7 +29,7 @@ func haveAllowedChars(s string) bool {
 }
 
 func NewClient(projName, keyStr string) (Client, error) {
-	if len(keyStr) >= 20 && !haveAllowedChars(keyStr) {
+	if len(keyStr) < 20 || !haveAllowedChars(keyStr) {
 		return Client{}, errors.New(fmt.Sprintf("keyStr '%s' is either not greater than 20 in length or contains non ASCII characters", keyStr))
 	}
 	return Client{projName, keyStr}, nil
